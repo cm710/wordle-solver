@@ -35,3 +35,4 @@
 *.ilk
 *.pdb
 .vscode
+filter_list.txt

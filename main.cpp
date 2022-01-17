@@ -186,7 +186,7 @@ bool Match(uint8_t encoded_filter, string query, string target,
            unordered_map<string, int> word_map, uint8_t **filters) {
   int query_index = word_map[query];
   int target_index = word_map[target];
-  uint8_t filter_entry = filters[query_index][word_map[target]];
+  uint8_t filter_entry = filters[query_index][target_index];
   return filter_entry == encoded_filter;
 }
 

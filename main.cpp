@@ -1,10 +1,22 @@
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <locale>
+#include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 
 using namespace std;
+
+template <class T> 
+string FormatWithCommas(T value) {
+    std::stringstream ss;
+    ss.imbue(std::locale(""));
+    ss << std::fixed << value;
+    return ss.str();
+}
 
 bool ValidateFilter(string filter) {
   if (filter.size() != 5)
@@ -129,25 +141,117 @@ uint8_t **ComputeFilters(vector<string> word_list, string filename,
   return filters;
 }
 
+bool SlowMatch(uint8_t encoded_filter, string input, string target) {
+  char filter[6];
+  strcpy(filter, DecodeFilter(encoded_filter).c_str());
+
+  for (int i = 0; i < 5; i++) {
+    bool found = false;
+    switch (filter[i]) {
+    case '2':
+      if (input.at(i) != target.at(i)) {
+        return false;
+      }
+      break;
+    case '1':
+      if (target.at(i) == input.at(i)) {
+        return false;
+      }
+      for (int j = 0; j < 5; j++) {
+        if (i != j && target.at(j) == input.at(i) && filter[j] != '2') {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        return false;
+      break;
+    case '0':
+      for (int j = 0; j < 5; j++) {
+        if (target.at(j) == input.at(i) && filter[j] != '2') {
+          return false;
+        }
+      }
+      break;
+
+    default:
+      return false;
+      break;
+    }
+  }
+
+  return true;
+}
+
+bool Match(uint8_t encoded_filter, string query, string target, unordered_map<string, int> word_map, uint8_t **filters){
+  return filters[word_map[query]][word_map[target]] == encoded_filter;
+}
+
+vector<string> FilterWords(uint8_t encoded_filter, string query,
+                           vector<string> word_list,
+                           unordered_map<string, int> word_map,
+                           uint8_t **filters) {
+  for (vector<string>::iterator it = word_list.begin();
+       it != word_list.end();) {
+    if(!Match(encoded_filter, query, *it, word_map, filters)){
+      it = word_list.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  return word_list;
+}
+
+int CountMatches(uint8_t encoded_filter, string query, vector<string> word_list,
+                 unordered_map<string, int> word_map, uint8_t **filters) {
+  int result = 0;
+  for(string word : word_list) {
+    if(Match(encoded_filter, query, word, word_map, filters)){
+      result++;
+    }
+  }
+  return result;
+}
+
+int CountNonMatches(uint8_t encoded_filter, string query,
+                    vector<string> word_list,
+                    unordered_map<string, int> word_map, uint8_t **filters) {
+  int result = 0;
+  for(string word : word_list) {
+    if(!Match(encoded_filter, query, word, word_map, filters)){
+      result++;
+    }
+  }
+  return result;
+}
+
 int main() {
   string line;
   ifstream list_file("wordlist.txt");
   string out_filter_file_name = "filter_list.txt";
+
   vector<string> word_list;
   uint8_t **filters;
   size_t word_count;
-  const bool recompute_filters = false;
+  unordered_map<string, int> word_map;
+
+  const bool recompute_filters = true;
 
   if (list_file.is_open()) {
-    while (getline(list_file, line)) {
+    int index = 0;
+    while (getline(list_file, line) 
+    //&& index < 4
+    ) {
       word_list.push_back(line);
+      word_map[line] = index;
+      index++;
     }
   }
 
   word_count = word_list.size();
   // word_count = 4;
 
-  cout << "Read " << word_list.size() << " words" << endl;
+  cout << "Read " << FormatWithCommas(word_list.size()) << " words" << endl;
 
   if (recompute_filters) {
     // Warning - may take a long time to run ComputeFilters(word_list)
@@ -165,24 +269,36 @@ int main() {
 
     filter_file.read((char *)filters_pointer,
                      sizeof(uint8_t) * word_count * word_count);
+    cout << "Read "
+         << FormatWithCommas(sizeof(uint8_t) * word_count * word_count)
+         << " filters from " << out_filter_file_name << endl;
   }
 
   // for safety make word_count small
   // word_count = 4;
-  // for (int i = 0; i < word_count; i++) {
-  //   for (int j = 0; j < word_count; j++) {
-  //     cout << word_list[i] << " - " << word_list[j] << " = "
-  //          << DecodeFilter(filters[i][j]) << endl;
-  //   }
-  // }
+  for (int i = 0; i < word_count; i++) {
+    for (int j = 0; j < word_count; j++) {
+      cout << word_list[i] << " - " << word_list[j] << " = "
+           << DecodeFilter(filters[i][j]) << endl;
+    }
+  }
 
+  // cout << endl;
+  // string query = "aioli";
+  // string target = "aalii";
+  // string filter = "21012";
+  // string result = Match(EncodeFilter(filter), query, target, word_map, filters)
+  //                     ? "TRUE"
+  //                     : "FALSE";
+  // cout << query << " - " << target << " = " << filter << " "
+  //      << result << endl;
 
-  // string filter = "21022";
-  // uint8_t encoded_filter = EncodeFilter(filter);
-  // cout << "Encoding of " << filter << " is " << encoded_filter << endl;
-  // cout << "Decoding of " << encoded_filter << " is " << DecodeFilter(encoded_filter) << endl;
+  // cout << "Word " << query << " - " << filter << " has "
+  //      << CountMatches(EncodeFilter(filter), query, word_list, word_map,
+  //                      filters)
+  //      << " matches" << endl;
 
-  // out_file << encoded_filter;
+  // cout << CreateFilter(query, target) << endl;
 
   cout << endl;
 }

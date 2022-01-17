@@ -19,7 +19,7 @@ After the program comes up with the optimal suggestion for its given set of word
 
 The program runs on an O(N^2) complexity, which means about 87 million operation points. This can take a long time at program initialization, which is why there are some ways to bypass this effort.
 
-The NxN filter table is the same for the same word list, so it only needs to be calculated once. As a result, in the program, as long as the recompute_filters variable is set to True, the program will spend about a minute computing all possible filters and then writing them into a file named filter_list.bin. After the first execution, this step is not necessary anymore, so the variable can be turned back to False, the program rebuilt and everything will run much faster. Another step is bypassed by hard coding the first optimal guess, "LARES" as it is not worth doing that every time the program starts.
+The NxN filter table is the same for the same word list, so it only needs to be calculated once. As a result, as long as the recompute_filters variable is set to True, the program will spend about a minute computing all possible filters and then writing them into a file named filter_list.bin. After the first execution, this step is not necessary anymore, so the variable can be turned back to False, the program rebuilt and everything will run much faster. Another step is bypassed by hard coding the first optimal guess, "LARES" as it is not worth doing that every time the program starts.
 
 ## Example of run
 ![This is an image](https://i.imgur.com/RKbB3g3.png)

@@ -139,7 +139,8 @@ uint8_t **ComputeFilters(vector<string> word_list, string filename,
 
   out_file.write((char *)filters_pointer,
                  sizeof(uint8_t) * word_count * word_count);
-  cout << "Done! Wrote results to " << filename << endl;
+  cout << "Done! Wrote " << FormatWithCommas(word_count * word_count)
+       << " filters to " << filename << endl;
 
   return filters;
 }
@@ -201,13 +202,16 @@ vector<string> FilterWords(uint8_t encoded_filter, string query,
                            unordered_map<string, int> partial_word_map,
                            uint8_t **filters,
                            vector<int> **compressed_filters) {
+  string upper_query = query;
+  transform(upper_query.begin(), upper_query.end(), upper_query.begin(),
+            ::toupper);
   cout << endl
        << "Filtering " << FormatWithCommas(partial_word_list.size())
-       << " words with guess " << query << " and filter "
+       << " words with guess \"" << upper_query << "\" and filter "
        << DecodeFilter(encoded_filter) << endl;
   vector<string> result;
-  for(string word : partial_word_list) {
-    if(Match(encoded_filter, query, word, original_word_map, filters)){
+  for (string word : partial_word_list) {
+    if (Match(encoded_filter, query, word, original_word_map, filters)) {
       result.push_back(word);
     } else {
       partial_word_map.erase(word);
@@ -270,7 +274,6 @@ int CountNonMatches(uint8_t encoded_filter, string query,
 }
 
 string FindSuggestion(vector<string> word_list,
-                      unordered_map<string, int> original_word_map,
                       unordered_map<string, int> partial_word_map,
                       uint8_t **filters, vector<int> **compressed_filters) {
   int min_words_remaining = -1;
@@ -290,13 +293,17 @@ string FindSuggestion(vector<string> word_list,
           compressed_filters[query_index][current_filter].size();
     }
 
+    // if (query == "arose") {
+    //   arose_score = current_word_cut;
+    // }
+
     if (current_word_cut < min_words_remaining || min_words_remaining < 0) {
       min_words_remaining = current_word_cut;
       best_word = query;
     }
   }
 
-  // cout << "Arose score: " << arose_score << endl;
+  // cout << "Arose score: " << FormatWithCommas(arose_score) << endl;
   // cout << "best reducing word " << best_word << " score - "
   //      << FormatWithCommas(min_words_remaining) << endl;
   return best_word;
@@ -319,9 +326,7 @@ int main() {
 
   if (list_file.is_open()) {
     int index = 0;
-    while (getline(list_file, line) 
-    // && index < 4
-    ) {
+    while (getline(list_file, line)) {
       partial_word_list.push_back(line);
       original_word_map[line] = index;
       partial_word_map[line] = index;
@@ -332,7 +337,6 @@ int main() {
   original_word_list = partial_word_list;
 
   word_count = original_word_list.size();
-  // word_count = 4;
 
   cout << "Read " << FormatWithCommas(original_word_list.size()) << " words"
        << endl;
@@ -361,7 +365,9 @@ int main() {
          << " filters from " << out_filter_file_name << endl;
   }
 
-  cout << "Fetching suggestion... " << endl;
+  cout << endl
+       << "Initializing program and fetching suggestion... " << endl
+       << endl;
 
   vector<int> *compressed_filter_pointer =
       (vector<int> *)malloc(word_count * 243 * sizeof(vector<int>));
@@ -369,7 +375,7 @@ int main() {
       (vector<int> **)malloc(sizeof(vector<int> *) * word_count);
 
   for (int i = 0; i < word_count; i++) {
-    compressed_filters[i] = &compressed_filter_pointer[i * 242];
+    compressed_filters[i] = &compressed_filter_pointer[i * 243];
   }
 
   // filling in the compressed filter data structure from the filter list
@@ -379,37 +385,32 @@ int main() {
     }
   }
 
-  // for safety make word_count small
-  // word_count = 4;
-  // for (int i = 0; i < word_count; i++) {
-  //   for (int j = 0; j < word_count; j++) {
-  //     cout << word_list[i] << " - " << word_list[j] << " = "
-  //          << DecodeFilter(filters[i][j]) << endl;
-  //   }
-  //   cout << endl;
-  // }
+  // FindSuggestion(partial_word_list, original_word_map, filters,
+  //                compressed_filters);
 
-  // cout << (int)EncodeFilter("22222") << endl;
-
-  // FindSuggestion(word_list, word_map, filters);
-
-  // cout << "filtering words" << endl;
-  // word_list = FilterWords(EncodeFilter("11101"), "lares", word_list,
-  //                           original_word_map, partial_word_map, filters,
-  //                           compressed_filters);
-  // cout << "done filtering" << endl;
+  // First suggestion is hardcoded to the word list. Refer to previous commit or
+  // the commented call above to change the call order and calculate it for a
+  // possible new list. For Scrabble, "lares" will narrow down, on average, to
+  // 25% less words than "arose", even though "arose" uses the top 5 letters as
+  // frequency, whereas "lares" only uses the first 4 and the 7th most frequent
+  // letter, ('l'). The expected number of words that "arose" can narrow down to
+  // is 2,566,195/9330 words (or 275.04 words) whereas "lares" will be expected
+  // to narrow down to 1,913,617/9330 words (or 205.1 words). That is a 25%
+  // increase in efficiency. This may be due to the fact that even though the
+  // letter 'o' is more common, it turns out to be less unique among different
+  // words and more common to repeat within the same word (e.g. via the 'oo'
+  // character group). Similar with 'i', the 6th most frequent letter.
+  string suggestion = "lares";
 
   while (partial_word_list.size() > 1) {
-    string suggestion =
-        FindSuggestion(partial_word_list, original_word_map, original_word_map,
-                       filters, compressed_filters);
     string upper_suggestion = suggestion;
     transform(upper_suggestion.begin(), upper_suggestion.end(),
               upper_suggestion.begin(), ::toupper);
+
     cout << "Suggested word: " << upper_suggestion << endl;
     cout << "Please enter filter value from website: ";
+    
     string current_filter = "";
-
     while (!ValidateFilter(current_filter)) {
       cin >> current_filter;
       if (!ValidateFilter(current_filter)) {
@@ -421,7 +422,9 @@ int main() {
         FilterWords(EncodeFilter(current_filter), suggestion,
                     original_word_list, partial_word_list, original_word_map,
                     partial_word_map, filters, compressed_filters);
-    
+
+    suggestion = FindSuggestion(partial_word_list, partial_word_map, filters,
+                                compressed_filters);
   }
 
   if (partial_word_list.size() == 1) {

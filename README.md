@@ -1,6 +1,13 @@
 # wordle-solver
 C++ program that provides an optimal solution to wordle
 
+## How to use
+Build and run the program with the `recompute_filters` variable set to `true`. `filter_list.bin` will be created locally with some precomputed data, after which you'll be prompted to submit a suggested word to wordle and input 5 numbers representing the colors you got back from the website. For example, for 🟩⬜🟨🟨🟨 you can insert **20111**. Rinse and repeat until you're left with one word.
+
+**Don't forget to reset the `recompute_filters` variable back to false and rebuild the program** This way, the program will skip the lenghty step of recomputing the filter list, so you'll be asked for a suggestion much faster.
+
+## How it works
+
 The algorithm this program uses is as follows: It reads a list of words from wordlist.txt which contains all 9330, 5 letter words in Scrabble. Let's call this total N.
 Then it creates a NxN (9330x9330) byte array and fills up its contents with the filter value between any two words.
 

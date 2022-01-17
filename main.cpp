@@ -117,7 +117,6 @@ uint8_t **ComputeFilters(vector<string> word_list, string filename,
   cout << "Computing and writing filters for all word pairs..." << endl;
   ofstream out_file;
   out_file.open(filename.c_str(), ios::out | ios::binary);
-  // size_t word_count = word_list.size();
 
   uint8_t *filters_pointer =
       (uint8_t *)malloc(sizeof(uint8_t) * word_count * word_count);
@@ -130,9 +129,6 @@ uint8_t **ComputeFilters(vector<string> word_list, string filename,
 
   for (int i = 0; i < word_count; i++) {
     for (int j = 0; j < word_count; j++) {
-      // if(word_list[i] == "lares" && word_list[j] == "solar"){
-      //   cout << "found lares and solar" << endl;
-      // }
       filters[i][j] = EncodeFilter(CreateFilter(word_list[i], word_list[j]));
     }
   }
@@ -408,7 +404,7 @@ int main() {
               upper_suggestion.begin(), ::toupper);
 
     cout << "Suggested word: " << upper_suggestion << endl;
-    cout << "Please enter filter value from website: ";
+    cout << "Please enter the filter value from website: ";
     
     string current_filter = "";
     while (!ValidateFilter(current_filter)) {
@@ -435,8 +431,6 @@ int main() {
   } else {
     cout << "No words remaining... " << endl;
   }
-
-  // cout << CreateFilter(query, target) << endl;
 
   cout << endl;
   system("pause");

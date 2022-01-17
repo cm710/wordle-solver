@@ -10,12 +10,13 @@
 
 using namespace std;
 
-template <class T> 
+template <class T>
+
 string FormatWithCommas(T value) {
-    std::stringstream ss;
-    ss.imbue(std::locale(""));
-    ss << std::fixed << value;
-    return ss.str();
+  stringstream ss;
+  ss.imbue(locale(""));
+  ss << fixed << value;
+  return ss.str();
 }
 
 bool ValidateFilter(string filter) {
@@ -36,14 +37,13 @@ uint8_t EncodeFilter(string filter) {
   uint8_t result = 0;
   for (string::size_type i = 0; i < filter.size(); i++) {
     int current_term;
-    switch (filter[i])
-    {
+    switch (filter[i]) {
     case '0':
-        current_term = 0;
-        break;
+      current_term = 0;
+      break;
     case '1':
-        current_term = 1;
-        break;
+      current_term = 1;
+      break;
     case '2':
       current_term = 2;
       break;
@@ -63,32 +63,31 @@ string DecodeFilter(uint8_t number) {
   if (number < 0 || number > 242) {
     return "error";
   }
-  char binary_result[] = {'0', '0', '0', '0', '0', '\0'}; 
+  char binary_result[] = {'0', '0', '0', '0', '0', '\0'};
 
-  for(int i = 0; i < 5; i++){
-      switch (number % 3)
-      {
-      case 0:
-        binary_result[5 - 1 - i] = '0';
-        break;
-      case 1:
-        binary_result[5 - 1 - i] = '1';
-        break;
-      case 2:
-        binary_result[5 - 1 - i] = '2';
-        break;
+  for (int i = 0; i < 5; i++) {
+    switch (number % 3) {
+    case 0:
+      binary_result[5 - 1 - i] = '0';
+      break;
+    case 1:
+      binary_result[5 - 1 - i] = '1';
+      break;
+    case 2:
+      binary_result[5 - 1 - i] = '2';
+      break;
 
-      default:
-          break;
-      }
-      number = number / 3;
+    default:
+      break;
+    }
+    number = number / 3;
   }
 
   return string(binary_result);
 }
 
 string CreateFilter(string input, string target) {
-  if(input.size() != 5 || target.size() != 5){
+  if (input.size() != 5 || target.size() != 5) {
     return "string_not_valid";
   }
   char binary_result[] = {'0', '0', '0', '0', '0', '\0'};
@@ -215,7 +214,7 @@ vector<string> FilterWords(uint8_t encoded_filter, string query,
   }
 
   for (int i = 0; i < 243; i++) {
-    if(i != encoded_filter){
+    if (i != encoded_filter) {
       compressed_filters[original_word_map[query]][i].clear();
     }
   }
@@ -224,8 +223,7 @@ vector<string> FilterWords(uint8_t encoded_filter, string query,
     for (int i = 0; i < 243; i++) {
       int word_index = original_word_map[word];
 
-      vector<int> filtered_vector(
-          compressed_filters[word_index][i].size());
+      vector<int> filtered_vector(compressed_filters[word_index][i].size());
 
       auto it = copy_if(
           compressed_filters[word_index][i].begin(),
@@ -249,8 +247,8 @@ vector<string> FilterWords(uint8_t encoded_filter, string query,
 int CountMatches(uint8_t encoded_filter, string query, vector<string> word_list,
                  unordered_map<string, int> word_map, uint8_t **filters) {
   int result = 0;
-  for(string word : word_list) {
-    if(Match(encoded_filter, query, word, word_map, filters)){
+  for (string word : word_list) {
+    if (Match(encoded_filter, query, word, word_map, filters)) {
       result++;
     }
   }
@@ -261,8 +259,8 @@ int CountNonMatches(uint8_t encoded_filter, string query,
                     vector<string> word_list,
                     unordered_map<string, int> word_map, uint8_t **filters) {
   int result = 0;
-  for(string word : word_list) {
-    if(!Match(encoded_filter, query, word, word_map, filters)){
+  for (string word : word_list) {
+    if (!Match(encoded_filter, query, word, word_map, filters)) {
       result++;
     }
   }
@@ -278,12 +276,11 @@ string FindSuggestion(vector<string> word_list,
 
   for (string query : word_list) {
     int current_word_cut = 0;
-    
-    for (string potential_word : word_list){
+
+    for (string potential_word : word_list) {
       int query_index = partial_word_map[query];
       int potential_word_index = partial_word_map[potential_word];
-      uint8_t current_filter =
-          filters[query_index][potential_word_index];
+      uint8_t current_filter = filters[query_index][potential_word_index];
 
       current_word_cut +=
           compressed_filters[query_index][current_filter].size();
@@ -405,7 +402,7 @@ int main() {
 
     cout << "Suggested word: " << upper_suggestion << endl;
     cout << "Please enter the filter value from website: ";
-    
+
     string current_filter = "";
     while (!ValidateFilter(current_filter)) {
       cin >> current_filter;

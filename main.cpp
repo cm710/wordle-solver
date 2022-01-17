@@ -439,4 +439,5 @@ int main() {
   // cout << CreateFilter(query, target) << endl;
 
   cout << endl;
+  system("pause");
 }

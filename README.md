@@ -1,7 +1,7 @@
 # wordle-solver
 C++ program that provides an optimal solution to wordle
 
-The algorithm this program uses is as follows. It reads a list of words from wordlist.txt which contains all 9330 5 letter words in Scrabble. Let's call this total N.
+The algorithm this program uses is as follows: It reads a list of words from wordlist.txt which contains all 9330, 5 letter words in Scrabble. Let's call this total N.
 Then it creates a NxN (9330x9330) byte array and fills up its contents with the filter value between any two words.
 
 In other words, if the final word is "SOLAR" and a guess would be "SNARL", the website would output (green)(grey)(yellow)(yellow)(yellow). I encode this into a base 3 number as 20111. Or in decimal, 175. All possible values range from "00000" to "22222" which in decimal translates from 0 to 242. Given this range of valid consecutive values, this means that the possible values for a filter fit in one 8-bit unsigned number.
@@ -14,8 +14,11 @@ As an aside, the first guess given this Scrabble set turns out to be "LARES". It
 
 After the program comes up with the optimal suggestion for its given set of words, it asks the user to insert the filter result they got from the website. It then filters the list of words given the user's guess and the given filter and starts looking for a suggestion corresponding to the new set of words. Rinse and repeat until there is 0 or 1 words left.
 
-Notes on execution time:
+## Notes on execution time:
 
 The program runs on an O(N^2) complexity, which means about 87 million operation points. This can take a long time at program initialization, which is why there are some ways to bypass this effort.
 
 The NxN filter table is the same for the same word list, so it only needs to be calculated once. As a result, in the program, as long as the recompute_filters variable is set to True, the program will spend about a minute computing all possible filters and then writing them into a file named filter_list.bin. After the first execution, this step is not necessary anymore, so the variable can be turned back to False, the program rebuilt and everything will run much faster. Another step is bypassed by hard coding the first optimal guess, "LARES" as it is not worth doing that every time the program starts.
+
+## Example of run
+![This is an image](https://i.imgur.com/RKbB3g3.png)

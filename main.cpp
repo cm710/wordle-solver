@@ -407,7 +407,7 @@ int main() {
     while (!ValidateFilter(current_filter)) {
       cin >> current_filter;
       if (!ValidateFilter(current_filter)) {
-        cout << "Invalid filtered entered. Try again. > ";
+        cout << "Invalid filter entered. Try again. > ";
       }
     }
 

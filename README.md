@@ -10,6 +10,7 @@ After creating the NxN array, I compute the optimal guess for each word list or 
 
 What I end up with is the lowest expected value for the remaining words should I guess the right word. This value is based on the fact that each word is equally likely to be shown. If there is a different probability for a word to be chosen than others, those can be easily calculated and a weighted average can be determined.
 
+### First optimal guess
 As an aside, the first guess given this Scrabble set turns out to be "LARES". It will narrow down the words to an expected value of 205.1 words. One may think that the best first guess is "AROSE" since it uses the first 5 most likely letters encountered in this set of words, whereas, L turns out to be th 7th most frequent word in the word list. However, "AROSE" will narrow down the main list to an average of 275.04 words, almost a quarter less efficient than "LARES". This may be due to the fact that although O is more frequent than L, it is less useful as it tends to repeat in the same word multiple times, making its capacity for reducing entropy less potent. Similar for I, the 6th most frequent letter.
 
 After the program comes up with the optimal suggestion for its given set of words, it asks the user to insert the filter result they got from the website. It then filters the list of words given the user's guess and the given filter and starts looking for a suggestion corresponding to the new set of words. Rinse and repeat until there is 0 or 1 words left.

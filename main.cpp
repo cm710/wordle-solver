@@ -290,7 +290,14 @@ string FindSuggestion(vector<string> word_list,
     //   arose_score = current_word_cut;
     // }
 
-    if (current_word_cut < min_words_remaining || min_words_remaining < 0) {
+    // Seems that if we're checking for <= instead of <, we're getting better
+    // guesses. This may result from the fact that if there are multiple words
+    // with the minimum score, <= picks out the last word instead of the first
+    // one. This usually happens to be higher up the list of scrabble words
+    // (wordlist.txt is sorted in the order of points). This seems to arrive at
+    // the guess faster, even though the assumption is that all words are
+    // equally likely. This might not be true.
+    if (current_word_cut <= min_words_remaining || min_words_remaining < 0) {
       min_words_remaining = current_word_cut;
       best_word = query;
     }

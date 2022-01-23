@@ -136,7 +136,10 @@ uint8_t **ComputeFilters(vector<string> word_list, string filename,
   out_file.write((char *)filters_pointer,
                  sizeof(uint8_t) * word_count * word_count);
   cout << "Done! Wrote " << FormatWithCommas(word_count * word_count)
-       << " filters to " << filename << endl;
+       << " filters to " << filename << endl
+       << "Next time you can run this program with no arguments to skip this "
+          "step and read the filter values from the "
+       << filename << " file." << endl;
 
   return filters;
 }
@@ -312,7 +315,7 @@ string FindSuggestion(vector<string> word_list,
   return best_word;
 }
 
-int main() {
+int main(int argc, char **argv) {
   string line;
   ifstream list_file("wordlist.txt");
   string out_filter_file_name = "filter_list.bin";
@@ -325,7 +328,13 @@ int main() {
   unordered_map<string, int> original_word_map;
   unordered_map<string, int> partial_word_map;
 
-  const bool recompute_filters = false;
+  bool recompute_filters = false;
+  if (argc > 1) {
+    string argument = argv[1];
+    if (argument.find("recompute-filters") != string::npos) {
+      recompute_filters = true;
+    }
+  }
 
   if (list_file.is_open()) {
     int index = 0;
@@ -335,6 +344,11 @@ int main() {
       partial_word_map[line] = index;
       index++;
     }
+  } else {
+    cout << "Error: Could not find wordlist.txt. Unable to retrieve word list"
+         << endl;
+    system("pause");
+    return 1;
   }
 
   original_word_list = partial_word_list;
@@ -354,6 +368,15 @@ int main() {
 
     FILE *filter_file;
     filter_file = fopen(out_filter_file_name.c_str(), "rb");
+    if(!filter_file){
+      cout << "Error: Filter mapping file not found. Could not find and open "
+           << out_filter_file_name
+           << ". Try running the program with the recompute-filters argument "
+              "so the file will be generated."
+           << endl;
+      system("pause");
+      return 2;
+    }
     fread(filters_pointer, sizeof(uint8_t), word_count * word_count,
           filter_file);
     fclose(filter_file);
@@ -441,4 +464,5 @@ int main() {
 
   cout << endl;
   system("pause");
+  return 0;
 }

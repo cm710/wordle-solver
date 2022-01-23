@@ -35,4 +35,7 @@
 *.ilk
 *.pdb
 .vscode
+
+# Other files
 filter_list.txt
+*.bin

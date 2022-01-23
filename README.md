@@ -2,9 +2,9 @@
 C++ program that provides an optimal solution to wordle
 
 ## How to use
-Build and run the program with the `recompute_filters` variable set to `true`. `filter_list.bin` will be created locally with some precomputed data, after which you'll be prompted to submit a suggested word to wordle and input 5 numbers representing the colors you got back from the website. For example, for 🟩⬜🟨🟨🟨 you can insert **20111**. Rinse and repeat until you're left with one word.
+Build and run the program with the `recompute-filters` argument. `filter_list.bin` will be created locally with some precomputed data, after which you'll be prompted to submit a suggested word to wordle and input 5 numbers representing the colors you got back from the website. For example, for 🟩⬜🟨🟨🟨 you can insert **20111**. Rinse and repeat until you're left with one word.
 
-**Don't forget to reset the `recompute_filters` variable back to `false` and rebuild the program.** This way, the program will skip the lenghty step of recomputing the filter list, so you'll be given a suggestion much faster.
+After this you can run the program with no arguments. This way, the program will skip the lenghty step of recomputing the filter list, so you'll be given a suggestion much faster.
 
 ## Example of run
 ![This is an image](https://i.imgur.com/GTjquXB.png)

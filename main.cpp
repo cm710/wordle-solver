@@ -316,7 +316,6 @@ string FindSuggestion(vector<string> word_list,
 }
 
 int main(int argc, char **argv) {
-  string line;
   ifstream list_file("wordlist.txt");
   string out_filter_file_name = "filter_list.bin";
 
@@ -336,16 +335,19 @@ int main(int argc, char **argv) {
     }
   }
 
+  string line;
   if (list_file.is_open()) {
     int index = 0;
     while (getline(list_file, line)) {
+      line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
       partial_word_list.push_back(line);
       original_word_map[line] = index;
       partial_word_map[line] = index;
       index++;
     }
   } else {
-    cout << "Error: Could not find wordlist.txt. Unable to retrieve word list"
+    cout << "Error: Could not find and open wordlist.txt. Unable to retrieve "
+            "word list"
          << endl;
     system("pause");
     return 1;
@@ -368,7 +370,7 @@ int main(int argc, char **argv) {
 
     FILE *filter_file;
     filter_file = fopen(out_filter_file_name.c_str(), "rb");
-    if(!filter_file){
+    if (!filter_file) {
       cout << "Error: Filter mapping file not found. Could not find and open "
            << out_filter_file_name
            << ". Try running the program with the recompute-filters argument "
